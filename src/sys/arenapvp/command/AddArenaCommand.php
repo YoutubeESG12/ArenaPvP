@@ -31,6 +31,9 @@ class AddArenaCommand extends BaseArenaUserCommand {
 		if ($sender->isOp()) {
 			if (isset($args[0])) {
 				switch (strtolower($args[0])) {
+					case "help":
+						$this->sendArenaHelp($sender);
+						return true;
 					case "save":
 						if (isset($args[1])) {
 							$arena = $this->getPlugin()->getArenaManager()->getArenaById($args[1] - 1);
@@ -119,13 +122,13 @@ class AddArenaCommand extends BaseArenaUserCommand {
 						return TextFormat::GREEN . "Second edge set!";
 						break;
 					case "finish":
-						$pos1 = $this->positions[$sender->getName()]["pos1"];
-						$pos2 = $this->positions[$sender->getName()]["pos2"];
-						$edge1 = $this->positions[$sender->getName()]["edge1"];
-						$edge2 = $this->positions[$sender->getName()]["edge2"];
-						$type = $this->positions[$sender->getName()]["type"];
-						$maxBuildHeight = $this->positions[$sender->getName()]["maxBuildHeight"];
-						if (isset($pos1, $pos2, $type, $edge1, $edge2, $maxBuildHeight)) {
+						if (count($this->positions) >= 5) {
+							$pos1 = $this->positions[$sender->getName()]["pos1"];
+							$pos2 = $this->positions[$sender->getName()]["pos2"];
+							$edge1 = $this->positions[$sender->getName()]["edge1"];
+							$edge2 = $this->positions[$sender->getName()]["edge2"];
+							$type = $this->positions[$sender->getName()]["type"];
+							$maxBuildHeight = $this->positions[$sender->getName()]["maxBuildHeight"];
 							$sender->addTitle(TextFormat::GREEN . "Arena added!", TextFormat::GRAY . "The arena was successfully created!", 20, 100, 20);
 							$this->getPlugin()->getArenaManager()->createArena($this->getPlugin()->getArenaManager()->getNextArenaIndex(), $pos1, $pos2, $edge1, $edge2, $sender->getLevel(), $type, $maxBuildHeight);
 							unset($this->positions[$sender->getName()]);
@@ -135,9 +138,17 @@ class AddArenaCommand extends BaseArenaUserCommand {
 						}
 				}
 			}
-			return TextFormat::RED . "Usage: " . $this->getUsage();
+			$this->sendArenaHelp($sender);
+			return true;
 		}
 		return TextFormat::RED . "You must be OP to use this command!";
+	}
+
+	private function sendArenaHelp(CommandSender $sender) {
+		$messages = [TextFormat::GRAY . "----- Arena Command Help -----", TextFormat::GOLD . "/addarena count" . TextFormat::GRAY . " - Tells the sender how many arenas there are", TextFormat::GOLD . "/addarena [edge1|edge2]" . TextFormat::GRAY . " - Sets the one of the two edges at the player's position  during the creation process", TextFormat::GOLD . "/addarena finish" . TextFormat::GRAY . " - Finishes the creation process and creates an arena", TextFormat::GOLD . "/addarena maxbuildheight [height]" . TextFormat::GRAY . " - Sets the max build height of an arena during the creation process", TextFormat::GOLD . "/addarena [pos1|pos2]" . TextFormat::GRAY . " - Sets one of the two starting positions at the player's location during the creation process", TextFormat::GOLD . "/addarena remove [arena-id]" . TextFormat::GRAY . " - Removes an existing arena from the list by it's id", TextFormat::GOLD . "/addarena reset [arena-id]" . TextFormat::GRAY . " - Resets an existing arena by it's id", TextFormat::GOLD . "/addarena save [arena-id]" . TextFormat::GRAY . " - Saves an existing arena by it's id", TextFormat::GOLD . "/addarena tp [arena-id]" . TextFormat::GRAY . " - Teleports the sender to an arena by it's id", TextFormat::GOLD . "/addarena type [arena-type]" . TextFormat::GRAY . " - Sets the arena type during the creation process", TextFormat::GRAY . "------------------------------", TextFormat::GRAY . "(Both positions, both edges, the max build height, and the type must all be set to create an arena)",];
+		foreach ($messages as $message) {
+			$sender->sendMessage($message);
+		}
 	}
 
 }
