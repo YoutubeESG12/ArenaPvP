@@ -158,6 +158,10 @@ class ArenaPlayer extends Player {
 		$this->os = $os;
 	}
 
+	public function sendCommandData() {
+		parent::sendCommandData();
+	}
+
 	/**
 	 * @return bool
 	 */

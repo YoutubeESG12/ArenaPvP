@@ -17,7 +17,6 @@ use pocketmine\utils\Config;
 use pocketmine\utils\TextFormat;
 use sys\arenapvp\arena\ArenaManager;
 use sys\arenapvp\ArenaPvP;
-use sys\arenapvp\utils\CustomBow;
 use sys\arenapvp\utils\GoldenHead;
 
 class KitManager {
@@ -35,7 +34,6 @@ class KitManager {
 		$this->plugin = $plugin;
 		$plugin->saveResource("kits.json", false);
 		$this->config = new Config($plugin->getDataFolder() . "kits.json", Config::JSON);
-		ItemFactory::registerItem(new CustomBow(Item::BOW, 0, 1));
 		ItemFactory::registerItem(new GoldenHead());
 		$this->loadKits();
 	}
