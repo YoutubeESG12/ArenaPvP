@@ -1,5 +1,5 @@
 name: ArenaPvP
-description: The ArenaPvP plugin
+description: An ArenaPvP plugin for Pocketmine-MP
 author: Irish
 main: sys\arenapvp\ArenaPvP
 version: 1.2.0
