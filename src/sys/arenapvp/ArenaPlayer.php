@@ -227,9 +227,10 @@ class ArenaPlayer extends Player {
 	/**
 	 * @param Queue|null $queue
 	 */
-	public function setQueue($queue) {
+	public function setQueue(?Queue $queue) {
 		$this->queue = $queue;
 	}
+
 
 	public function removeFromQueue() {
 		if($this->inQueue()) {
@@ -238,10 +239,16 @@ class ArenaPlayer extends Player {
 		}
 	}
 
+	/**
+	 * @param Menu $menu
+	 */
 	public function addMenu(Menu $menu) {
 		$this->menu = $menu;
 	}
 
+	/**
+	 * @param string $name
+	 */
 	public function sendMenu(string $name) {
 		if ($this->inMenu() and $this->getLevel() !== null) {
 			$tile = Tile::createTile("ArenaChest", $this->getLevel(), new CompoundTag("", [new StringTag("CustomName", $name), new StringTag("id", Tile::CHEST), new IntTag("x", floor($this->getX())), new IntTag("y", floor($this->getY()) + 4), new IntTag("z", floor($this->getZ())),]));

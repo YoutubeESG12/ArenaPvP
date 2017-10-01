@@ -217,7 +217,7 @@ class LobbyListener extends BaseListener {
 			$transaction = $action;
 		}
 
-		$item = $transaction->getTargetItem();
+		$item = $transaction->getTargetItem()->getId() == 0 ? $transaction->getTargetItem() : $transaction->getSourceItem();
 		if ($player instanceof ArenaPlayer and $chestInventory instanceof ArenaChestInventory and $item instanceof Item and $player->inMenu()) {
 			$player->getMenu()->getInteraction($player, $chestInventory, $item);
 			$event->setCancelled();
