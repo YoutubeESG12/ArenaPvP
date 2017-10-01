@@ -41,7 +41,11 @@ class ArenaPvP extends PluginBase {
 	/** @var PartyManager */
 	private $partyManager;
 
-	public function onLoad() {
+	/*
+	 * Don't put the loaders into the onLoad function, as trying to start
+	 * a task, before the plugin is fully enabled, will not work
+	 */
+	public function onEnable() {
 		$this->loadArenaManager();
 		$this->loadCommandManager();
 		$this->loadInteractionManager();
@@ -50,9 +54,6 @@ class ArenaPvP extends PluginBase {
 		$this->loadPartyManager();
 		$this->loadQueueManager();
 		$this->loadListeners();
-	}
-
-	public function onEnable() {
 		$this->getLogger()->info(TextFormat::GREEN . $this->getDescription()->getName() . " has been enabled!");
 	}
 

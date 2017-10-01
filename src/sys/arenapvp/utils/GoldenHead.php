@@ -14,11 +14,10 @@ use pocketmine\item\GoldenApple;
 
 class GoldenHead extends GoldenApple {
 
-	public function __construct($meta = 1) {
+	public function __construct($meta = 0) {
 		parent::__construct($meta);
 
 	}
-
 	public function getAdditionalEffects(): array {
 		return [Effect::getEffect(Effect::ABSORPTION)->setDuration(20 * 120), Effect::getEffect(Effect::REGENERATION)->setAmplifier(1)->setDuration(20 * ($this->getDamage() == 1 ? 10 : 5))];
 	}

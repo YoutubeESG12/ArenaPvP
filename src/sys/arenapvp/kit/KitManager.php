@@ -34,7 +34,7 @@ class KitManager {
 		$this->plugin = $plugin;
 		$plugin->saveResource("kits.json", false);
 		$this->config = new Config($plugin->getDataFolder() . "kits.json", Config::JSON);
-		ItemFactory::registerItem(new GoldenHead());
+		ItemFactory::registerItem(new GoldenHead(), true);
 		$this->loadKits();
 	}
 
@@ -91,7 +91,10 @@ class KitManager {
 			$parsedItem = Item::get($item["id"], $item["meta"]);
 			if (isset($item["enchantments"])) {
 				foreach ($item["enchantments"] as $enchantment) {
-					$parsedItem->addEnchantment(Enchantment::getEnchantment($enchantment[0])->setLevel($enchantment[1]));
+					$enchantmentObject = Enchantment::getEnchantment($enchantment[0]);
+					if ($enchantmentObject instanceof Enchantment) {
+						$parsedItem->addEnchantment($enchantmentObject->setLevel($enchantment[1]));
+					}
 				}
 			}
 			if (isset($item["customName"])) {
@@ -122,8 +125,11 @@ class KitManager {
 		foreach ($armor as $item) {
 			$parsedItem = Item::get($item[0]);
 			if (isset($item[1])) {
-				foreach ($item[1] as $ench) {
-					$parsedItem->addEnchantment(Enchantment::getEnchantment($ench[0])->setLevel($ench[1]));
+				foreach ($item[1] as $enchantment) {
+					$enchantmentObject = Enchantment::getEnchantment($enchantment[0]);
+					if ($enchantmentObject instanceof Enchantment) {
+						$parsedItem->addEnchantment($enchantmentObject->setLevel($enchantment[1]));
+					}
 				}
 			}
 			$parsedArmor[] = $parsedItem;
