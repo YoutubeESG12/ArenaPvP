@@ -52,8 +52,12 @@ class PartyManager {
 	 * @param string $name
 	 * @return Party
 	 */
-	public function getPartyByInvite(string $name): Party {
-		return $this->getPlayer($name)->getParty();
+	public function getPartyByInvite(string $name): ?Party {
+		$player = $$this->getPlugin()->getServer()->getPlayer($name);
+		if ($player instanceof ArenaPlayer) {
+			return $player->getParty();
+		}
+		return null;
 	}
 
 	public function getPartyFromPlayer(ArenaPlayer $player) {
@@ -66,7 +70,7 @@ class PartyManager {
 	}
 
 	public function hasInvite(ArenaPlayer $player, string $playerName = "") {
-		$host = $this->getPlayer($playerName);
+		$host = $this->getPlugin()->getServer()->getPlayer($playerName);
 		if ($host instanceof ArenaPlayer) {
 			foreach ($this->invites as $invite) {
 				if ($invite->getFrom()->getName() == $host->getName()) {
@@ -83,7 +87,7 @@ class PartyManager {
 	 * @return bool|Invite
 	 */
 	private function getInvite(ArenaPlayer $player, string $playerName = "") {
-		$host = $this->getPlayer($playerName);
+		$host = $this->getPlugin()->getServer()->getPlayer($playerName);
 		if ($host instanceof ArenaPlayer and $this->hasInvite($player, $playerName)) {
 			foreach ($this->invites as $invite) {
 				if ($invite->getFrom()->getName() == $host->getName() and $invite->isInvited($player)) {
@@ -149,32 +153,6 @@ class PartyManager {
 		if (isset($this->invites[$player->getName()])) {
 			unset($this->invites[$player->getName()]);
 		}
-	}
-
-	/**
-	 * @param string $name
-	 *
-	 * @return ArenaPlayer|null
-	 */
-	public function getPlayer(string $name) {
-		$found = null;
-		$name = strtolower($name);
-		$delta = PHP_INT_MAX;
-		/** @var ArenaPlayer[] $players */
-		$players = $this->getPlugin()->getServer()->getOnlinePlayers();
-		foreach ($players as $player) {
-			if (stripos($player->getName(), $name) === 0) {
-				$curDelta = strlen($player->getName()) - strlen($name);
-				if ($curDelta < $delta) {
-					$found = $player;
-					$delta = $curDelta;
-				}
-				if ($curDelta === 0) {
-					break;
-				}
-			}
-		}
-		return $found;
 	}
 
 }

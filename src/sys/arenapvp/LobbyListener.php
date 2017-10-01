@@ -45,11 +45,19 @@ class LobbyListener extends BaseListener {
 		$this->init();
 	}
 
-	private function init() {
+	private function init(): void {
 		Tile::registerTile(ArenaChest::class);
 	}
 
-	public function onQuit(PlayerQuitEvent $event) {
+	/**
+	 * @priority HIGHEST
+	 * @param PlayerCreationEvent $event
+	 */
+	public function onCreation(PlayerCreationEvent $event): void {
+		$event->setPlayerClass(ArenaPlayer::class);
+	}
+
+	public function onQuit(PlayerQuitEvent $event): void {
 		$player = $event->getPlayer();
 		if ($player instanceof ArenaPlayer) {
 			if ($player->inQueue()) {
@@ -70,7 +78,7 @@ class LobbyListener extends BaseListener {
 		}
 	}
 
-	public function onKick(PlayerKickEvent $event) {
+	public function onKick(PlayerKickEvent $event): void {
 		$player = $event->getPlayer();
 		if ($player instanceof ArenaPlayer) {
 			if ($player->inQueue()) {
@@ -91,7 +99,7 @@ class LobbyListener extends BaseListener {
 		}
 	}
 
-	public function onDropItem(PlayerDropItemEvent $event) {
+	public function onDropItem(PlayerDropItemEvent $event): void {
 		$player = $event->getPlayer();
 		if ($player instanceof ArenaPlayer) {
 			if (!$player->getMatch() instanceof Match and !$player->isOp()) {
@@ -100,7 +108,7 @@ class LobbyListener extends BaseListener {
 		}
 	}
 
-	public function onPickup(InventoryPickupItemEvent $event) {
+	public function onPickup(InventoryPickupItemEvent $event): void {
 		$player = $event->getInventory()->getHolder();
 		if ($player instanceof ArenaPlayer) {
 			if (!$player->getMatch() instanceof Match and !$player->isOp()) {
@@ -112,7 +120,7 @@ class LobbyListener extends BaseListener {
 		}
 	}
 
-	public function onCombust(EntityCombustEvent $event) {
+	public function onCombust(EntityCombustEvent $event): void {
 		$player = $event->getEntity();
 		if ($player instanceof ArenaPlayer) {
 			if (!$player->inMatch() or $player->isSpectating() or $event instanceof EntityCombustByEntityEvent) {
@@ -121,7 +129,7 @@ class LobbyListener extends BaseListener {
 		}
 	}
 
-	public function onInteract(PlayerInteractEvent $event) {
+	public function onInteract(PlayerInteractEvent $event): void {
 		$player = $event->getPlayer();
 		$action = $event->getAction();
 		if ($action !== PlayerInteractEvent::LEFT_CLICK_AIR) {
@@ -137,7 +145,7 @@ class LobbyListener extends BaseListener {
 		}
 	}
 
-	public function onPacketReceive(DataPacketReceiveEvent $event) {
+	public function onPacketReceive(DataPacketReceiveEvent $event): void {
 		$packet = $event->getPacket();
 		if ($packet instanceof LoginPacket) {
 			$player = $event->getPlayer();
@@ -149,18 +157,18 @@ class LobbyListener extends BaseListener {
 		}
 	}
 
-	public function onDeath(PlayerDeathEvent $event) {
+	public function onDeath(PlayerDeathEvent $event): void {
 		$event->setDeathMessage(null);
 	}
 
-	public function onRespawn(PlayerRespawnEvent $event) {
+	public function onRespawn(PlayerRespawnEvent $event): void {
 		$player = $event->getPlayer();
 		if ($player instanceof ArenaPlayer) {
 			$this->getPlugin()->getArenaManager()->addLobbyItems($player);
 		}
 	}
 
-	public function onDamage(EntityDamageEvent $event) {
+	public function onDamage(EntityDamageEvent $event): void {
 		$player = $event->getEntity();
 		if ($player instanceof ArenaPlayer) {
 			if ($player->isSpectating()) {
@@ -178,7 +186,7 @@ class LobbyListener extends BaseListener {
 		}
 	}
 
-	public function onJoin(PlayerJoinEvent $event) {
+	public function onJoin(PlayerJoinEvent $event): void {
 		$player = $event->getPlayer();
 		if ($player instanceof ArenaPlayer) {
 			$player->loadData();
@@ -189,11 +197,7 @@ class LobbyListener extends BaseListener {
 		}
 	}
 
-	public function onCreation(PlayerCreationEvent $event) {
-		$event->setPlayerClass(ArenaPlayer::class);
-	}
-
-	public function onTransaction(InventoryTransactionEvent $event) {
+	public function onTransaction(InventoryTransactionEvent $event): void {
 		$chestInventory = null;
 		$transaction = null;
 
@@ -221,7 +225,7 @@ class LobbyListener extends BaseListener {
 
 	}
 
-	public function onBreak(BlockBreakEvent $event) {
+	public function onBreak(BlockBreakEvent $event): void {
 		$player = $event->getPlayer();
 		if ($player instanceof ArenaPlayer) {
 			if ($player->isSpectating()) {
@@ -230,7 +234,7 @@ class LobbyListener extends BaseListener {
 		}
 	}
 
-	public function onPlace(BlockPlaceEvent $event) {
+	public function onPlace(BlockPlaceEvent $event): void {
 		$player = $event->getPlayer();
 		if ($player instanceof ArenaPlayer) {
 			if ($player->isSpectating()) {
@@ -242,7 +246,7 @@ class LobbyListener extends BaseListener {
 	/**
 	 * @param PlayerExhaustEvent $event
 	 */
-	public function onExhaust(PlayerExhaustEvent $event) {
+	public function onExhaust(PlayerExhaustEvent $event): void {
 		$player = $event->getPlayer();
 		if ($player instanceof ArenaPlayer and (!$player->inMatch() or $player->isSpectating())) {
 			$event->setCancelled();
@@ -252,7 +256,7 @@ class LobbyListener extends BaseListener {
 	/**
 	 * @param InventoryCloseEvent $event
 	 */
-	public function onClose(InventoryCloseEvent $event) {
+	public function onClose(InventoryCloseEvent $event): void {
 		$player = $event->getPlayer();
 		if ($player instanceof ArenaPlayer) {
 			if ($player->inMenu()) {

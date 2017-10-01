@@ -190,7 +190,7 @@ class ArenaPlayer extends Player {
 	/**
 	 * @return Match|null
 	 */
-	public function getMatch() {
+	public function getMatch(): ?Match {
 		return $this->match;
 	}
 
@@ -220,7 +220,7 @@ class ArenaPlayer extends Player {
 	/**
 	 * @return Queue|null
 	 */
-	public function getQueue(): Queue {
+	public function getQueue(): ?Queue {
 		return $this->queue;
 	}
 
@@ -267,7 +267,7 @@ class ArenaPlayer extends Player {
 	/**
 	 * @return Menu|null
 	 */
-	public function getMenu() {
+	public function getMenu(): ?Menu {
 		return $this->menu ?? null;
 	}
 
@@ -327,7 +327,7 @@ class ArenaPlayer extends Player {
 	/**
 	 * @return Match|null
 	 */
-	public function getMatchSpectating() {
+	public function getMatchSpectating(): ?Match {
 		return $this->spectatingMatch;
 	}
 
@@ -518,7 +518,7 @@ class ArenaPlayer extends Player {
 	 * @param string $hack
 	 * @return int|null
 	 */
-	public function getSuspicion(string $hack) {
+	public function getSuspicion(string $hack): ?int {
 		return $this->hackSuspicion[$hack] ?? null;
 	}
 

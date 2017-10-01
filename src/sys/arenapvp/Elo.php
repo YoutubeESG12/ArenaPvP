@@ -49,7 +49,7 @@ class Elo {
 		$this->elo = $elo;
 	}
 
-	public function calculateNewElo(ArenaPlayer $winner, ArenaPlayer $loser) {
+	public function calculateNewElo(ArenaPlayer $winner, ArenaPlayer $loser): void {
 		$winnerElo = $winner->getElo($this->getKit())->getElo();
 		$loserElo = $loser->getElo($this->getKit())->getElo();
 

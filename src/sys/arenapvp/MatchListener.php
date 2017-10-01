@@ -16,7 +16,6 @@ use pocketmine\event\entity\EntityDamageEvent;
 use pocketmine\event\entity\EntityRegainHealthEvent;
 use pocketmine\event\entity\ProjectileHitEvent;
 use pocketmine\event\inventory\CraftItemEvent;
-use pocketmine\event\player\PlayerCreationEvent;
 use pocketmine\event\player\PlayerInteractEvent;
 use pocketmine\event\player\PlayerKickEvent;
 use pocketmine\event\player\PlayerQuitEvent;
@@ -31,15 +30,7 @@ class MatchListener extends BaseListener {
 		parent::__construct($plugin);
 	}
 
-	/**
-	 * @priority HIGHEST
-	 * @param PlayerCreationEvent $event
-	 */
-	public function onCreation(PlayerCreationEvent $event) {
-		$event->setPlayerClass(ArenaPlayer::class);
-	}
-
-	public function onHit(ProjectileHitEvent $event) {
+	public function onHit(ProjectileHitEvent $event): void {
 		$entity = $event->getEntity();
 		$player = $entity->getOwningEntity();
 		if ($player instanceof ArenaPlayer) {
@@ -51,14 +42,14 @@ class MatchListener extends BaseListener {
 		}
 	}
 
-	public function onCraft(CraftItemEvent $event) {
+	public function onCraft(CraftItemEvent $event): void {
 		$player = $event->getPlayer();
 		if ($player instanceof ArenaPlayer and $player->getMatch() instanceof Match) {
 			$event->setCancelled();
 		}
 	}
 
-	public function onInteract(PlayerInteractEvent $event) {
+	public function onInteract(PlayerInteractEvent $event): void {
 		$player = $event->getPlayer();
 		if ($player instanceof ArenaPlayer and $player->inMatch()) {
 			$player->getMatch()->onInteract($event);
@@ -72,14 +63,14 @@ class MatchListener extends BaseListener {
 		}
 	}
 
-	public function onPlace(BlockPlaceEvent $event) {
+	public function onPlace(BlockPlaceEvent $event): void {
 		$player = $event->getPlayer();
 		if ($player instanceof ArenaPlayer and $player->inMatch()) {
 			$player->getMatch()->onPlace($event);
 		}
 	}
 
-	public function onRegainHealth(EntityRegainHealthEvent $event) {
+	public function onRegainHealth(EntityRegainHealthEvent $event): void {
 		$player = $event->getEntity();
 		if ($player instanceof ArenaPlayer and $player->inMatch()) {
 			$player->getMatch()->onRegainHealth($event);
@@ -87,21 +78,21 @@ class MatchListener extends BaseListener {
 	}
 
 
-	public function onDamage(EntityDamageEvent $event) {
+	public function onDamage(EntityDamageEvent $event): void {
 		$player = $event->getEntity();
 		if ($player instanceof ArenaPlayer and $player->inMatch()) {
 			$player->getMatch()->onDamage($event);
 		}
 	}
 
-	public function onQuit(PlayerQuitEvent $event) {
+	public function onQuit(PlayerQuitEvent $event): void {
 		$player = $event->getPlayer();
 		if ($player instanceof ArenaPlayer and $player->inMatch()) {
 			$player->getMatch()->onLeave($event);
 		}
 	}
 
-	public function onKick(PlayerKickEvent $event) {
+	public function onKick(PlayerKickEvent $event): void {
 		$player = $event->getPlayer();
 		if ($player instanceof ArenaPlayer and $player->inMatch()) {
 			$player->getMatch()->onLeave($event);
