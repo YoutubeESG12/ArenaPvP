@@ -13,6 +13,7 @@ use pocketmine\item\Item;
 use pocketmine\utils\TextFormat;
 use sys\arenapvp\ArenaPlayer;
 use sys\arenapvp\ArenaPvP;
+use sys\arenapvp\kit\Kit;
 use sys\arenapvp\menu\Menu;
 use sys\arenapvp\utils\ArenaChestInventory;
 
@@ -27,8 +28,9 @@ class RankedQueueKitMenu extends Menu {
 	}
 
 	public function getInteraction(ArenaPlayer $player, ArenaChestInventory $inventory, Item $item) {
-		$kit = $this->getPlugin()->getKitManager()->getKitByName(TextFormat::clean($item->getCustomName()));
-		if ($kit !== null) {
+		$name = TextFormat::clean($item->getCustomName());
+		$kit = $this->getPlugin()->getKitManager()->getKitByName($name);
+		if ($kit instanceof Kit) {
 			if ($player->getClientOs() == ArenaPlayer::OS_WIN10) {
 				$queue = $this->getPlugin()->getQueueManager()->getQueue($kit, true, true);
 			} else {

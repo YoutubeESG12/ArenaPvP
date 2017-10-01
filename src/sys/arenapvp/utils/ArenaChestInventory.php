@@ -53,7 +53,7 @@ class ArenaChestInventory extends ChestInventory {
 		return $this->holder;
 	}
 
-	public function onClose(Player $who) {
+	public function onClose(Player $who): void {
 		if(!$this->closed) {
 			$this->closed = true;
 			parent::onClose($who);

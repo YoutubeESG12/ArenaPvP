@@ -181,6 +181,7 @@ class LobbyListener extends BaseListener {
 	public function onJoin(PlayerJoinEvent $event) {
 		$player = $event->getPlayer();
 		if ($player instanceof ArenaPlayer) {
+			$player->loadData();
 			$player->loadElo();
 			$player->setNameTag(TextFormat::GRAY . $player->getName());
 			$player->reset();
@@ -212,7 +213,7 @@ class LobbyListener extends BaseListener {
 			$transaction = $action;
 		}
 
-		$item = $transaction->getSourceItem();
+		$item = $transaction->getTargetItem();
 		if ($player instanceof ArenaPlayer and $chestInventory instanceof ArenaChestInventory and $item instanceof Item and $player->inMenu()) {
 			$player->getMenu()->getInteraction($player, $chestInventory, $item);
 			$event->setCancelled();

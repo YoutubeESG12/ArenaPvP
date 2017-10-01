@@ -144,6 +144,10 @@ class ArenaPlayer extends Player {
 		return $this->data;
 	}
 
+	public function loadData() {
+		$this->data = new Config($this->getMain()->getDataFolder() . DIRECTORY_SEPARATOR . ArenaPvP::FOLDER_NAME . DIRECTORY_SEPARATOR . $this->getLowerCaseName() . ".json", Config::JSON);
+	}
+
 	/**
 	 * @return int
 	 */

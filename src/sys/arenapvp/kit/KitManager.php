@@ -72,7 +72,7 @@ class KitManager {
 	 * @param string $name
 	 * @return null|Kit
 	 */
-	public function getKitByName(string $name) {
+	public function getKitByName(string $name): ?Kit {
 		foreach ($this->getKits() as $kit) {
 			if ($kit->isKit($name)) {
 				return $kit;

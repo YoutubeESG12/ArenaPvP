@@ -20,6 +20,8 @@ use sys\arenapvp\queue\QueueManager;
 
 class ArenaPvP extends PluginBase {
 
+	const FOLDER_NAME = "players";
+
 	/** @var ArenaManager */
 	private $arenaManager;
 
@@ -48,6 +50,7 @@ class ArenaPvP extends PluginBase {
 	public function onEnable() {
 		$this->loadArenaManager();
 		$this->loadCommandManager();
+		$this->loadFolders();
 		$this->loadInteractionManager();
 		$this->loadKitManager();
 		$this->loadMatchManager();
@@ -94,6 +97,10 @@ class ArenaPvP extends PluginBase {
 
 	private function loadPartyManager() {
 		$this->partyManager = new PartyManager($this);
+	}
+
+	private function loadFolders() {
+		@mkdir($this->getDataFolder() . DIRECTORY_SEPARATOR . self::FOLDER_NAME);
 	}
 
 	/**
