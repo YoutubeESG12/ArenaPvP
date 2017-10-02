@@ -122,7 +122,7 @@ class AddArenaCommand extends BaseArenaUserCommand {
 						return TextFormat::GREEN . "Second edge set!";
 						break;
 					case "finish":
-						if (count($this->positions) >= 5) {
+						if (isset($this->positions[$sender->getName()]) and count($this->positions[$sender->getName()]) >= 5) {
 							$pos1 = $this->positions[$sender->getName()]["pos1"];
 							$pos2 = $this->positions[$sender->getName()]["pos2"];
 							$edge1 = $this->positions[$sender->getName()]["edge1"];
