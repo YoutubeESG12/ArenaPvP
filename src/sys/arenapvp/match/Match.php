@@ -134,7 +134,6 @@ class Match {
 	public function getAllOtherPlayers(ArenaPlayer $player) {
 		$otherPlayers = $this->getPlayers();
 		unset($otherPlayers[$player->getName()]);
-
 		return $otherPlayers;
 	}
 
@@ -275,7 +274,7 @@ class Match {
 	/**
 	 * @return bool
 	 */
-	public function hasStarted() {
+	public function hasStarted(): bool {
 		return $this->started;
 	}
 
@@ -701,17 +700,17 @@ class Match {
 	}
 
 	public function nullify() {
-		unset($this->arena);
-		unset($this->blocksPlaced);
-		unset($this->ended);
-		unset($this->kit);
-		unset($this->matchPlayers);
-		unset($this->players);
-		unset($this->plugin);
-		unset($this->positions);
-		unset($this->spectators);
-		unset($this->started);
-		unset($this->winner);
+		$this->arena = null;
+		$this->blocksPlaced = null;
+		$this->ended = null;
+		$this->kit = null;
+		$this->matchPlayers = null;
+		$this->players = null;
+		$this->plugin = null;
+		$this->positions = null;
+		$this->spectators = null;
+		$this->started = null;
+		$this->winner = null;
 	}
 
 }

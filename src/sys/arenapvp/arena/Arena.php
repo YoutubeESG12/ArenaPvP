@@ -218,7 +218,7 @@ class Arena {
 		}
 	}
 
-	public function resetArena($save = true) {
+	public function resetArena() {
 		$chunkCount = 0;
 		foreach ($this->getChunks() as $chunkString) {
 			$chunk = Chunk::fastDeserialize($chunkString);
@@ -230,7 +230,6 @@ class Arena {
 			$this->removeItemEntities($newChunk);
 
 		}
-		if ($save) $this->getLevel()->save();
 		MainLogger::getLogger()->debug("Arena #" . ($this->getId() + 1) . " > " . $chunkCount . " chunks reset!");
 		$this->setInUse(false);
 	}
