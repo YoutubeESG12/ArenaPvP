@@ -8,8 +8,6 @@
 
 namespace sys\arenapvp\arena;
 
-
-use pocketmine\block\Block;
 use pocketmine\entity\Item;
 use pocketmine\level\format\Chunk;
 use pocketmine\level\Level;
@@ -48,11 +46,11 @@ class Arena {
 	 * @param int $id
 	 * @param array $positions
 	 * @param array $edges
-	 * @param Level|null $level
+	 * @param Level $level
 	 * @param int $type
 	 * @param int $maxBuildHeight
 	 */
-	public function __construct(int $id, array $positions, array $edges, Level $level = null, int $type, int $maxBuildHeight) {
+	public function __construct(int $id, array $positions, array $edges, Level $level, int $type, int $maxBuildHeight) {
 		$this->type = $type;
 		$this->id = $id;
 		$this->level = $level;
@@ -80,8 +78,10 @@ class Arena {
 		return $this->type;
 	}
 
-
-	public function getLevel() {
+	/**
+	 * @return Level
+	 */
+	public function getLevel(): Level {
 		return $this->level;
 	}
 
@@ -94,10 +94,10 @@ class Arena {
 
 	/**
 	 * @param int $index
-	 * @return Position
+	 * @return Position|null
 	 */
-	public function getEdge(int $index): Position {
-		return $this->edges[$index];
+	public function getEdge(int $index): ?Position {
+		return $this->edges[$index] ?? null;
 	}
 
 	/**
@@ -110,7 +110,7 @@ class Arena {
 	/**
 	 * @return Position|null
 	 */
-	public function getRandomPosition(): Position {
+	public function getRandomPosition(): ?Position {
 		return $this->getPosition(array_rand($this->positions, 1));
 	}
 
@@ -118,7 +118,7 @@ class Arena {
 	 * @param int $index
 	 * @return Position|null
 	 */
-	public function getPosition(int $index): Position {
+	public function getPosition(int $index): ?Position {
 		return $this->positions[$index] ?? null;
 	}
 
@@ -178,7 +178,7 @@ class Arena {
 		$this->getLevel()->registerChunkLoader($this->chunks[$hash], $chunk->getX(), $chunk->getZ());
 	}
 
-	public function saveChunks($saveLevel = false){
+	public function saveChunks() {
 		$this->resetChunks();
 		$pos1 = $this->getEdge(0);
 		$pos2 = $this->getEdge(1);
@@ -194,7 +194,6 @@ class Arena {
 			}
 		}
 		MainLogger::getLogger()->debug("Arena #" . ($this->getId() + 1) . " > " . count($this->getChunks()) . " chunks saved!");
-		if ($saveLevel) $this->getLevel()->save();
 	}
 
 	public function prepareChunks() {

@@ -27,7 +27,7 @@ class Invite {
 	/**
 	 * @return ArenaPlayer
 	 */
-	public function getFrom(): ArenaPlayer {
+	public function getFrom(): ?ArenaPlayer {
 		return $this->from ?? null;
 	}
 

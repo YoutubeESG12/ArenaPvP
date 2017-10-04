@@ -40,7 +40,11 @@ class ArenaCommandManager {
 		$command->unregister($plugin->getServer()->getCommandMap());
 	}
 
-	public function getIndividualCommandData(string $commandName) {
+	/**
+	 * @param string $commandName
+	 * @return string|null
+	 */
+	public function getIndividualCommandData(string $commandName): ?string {
 		return $this->commandData[$commandName] ?? null;
 	}
 

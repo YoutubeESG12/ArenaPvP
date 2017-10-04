@@ -37,12 +37,12 @@ class AddArenaCommand extends BaseArenaUserCommand {
 					case "save":
 						if (isset($args[1])) {
 							$arena = $this->getPlugin()->getArenaManager()->getArenaById($args[1] - 1);
-							if ($arena === null) {
+							if (!$arena) {
 								return TextFormat::RED . "No arena was found by that name!";
 							}
 							$sender->sendMessage(TextFormat::GREEN . "Saving arena...");
 							$start = microtime(true);
-							$arena->saveChunks(true);
+							$arena->saveChunks();
 							return TextFormat::GREEN . "Time taken: " . (number_format(microtime(true) - $start, 3)) . "s";
 						}
 						break;
@@ -60,22 +60,10 @@ class AddArenaCommand extends BaseArenaUserCommand {
 							return TextFormat::GREEN . "Time taken: " . (number_format(microtime(true) - $start, 3)) . "s";
 						}
 						break;
-					case "removeblocks":
-						if (isset($args[1])) {
-							$arena = $this->getPlugin()->getArenaManager()->getArenaById($args[1] - 1);
-							if ($arena === null) {
-								return TextFormat::RED . "No arena was found by that name!";
-							}
-							$sender->sendMessage(TextFormat::GREEN . "Resetting arena blocks...");
-							$start = microtime(true);
-							$arena->removeBlocks();
-							return TextFormat::GREEN . "Time taken: " . (number_format(microtime(true) - $start, 3)) . "s";
-						}
-						break;
 					case "remove":
 						if (isset($args[1])) {
 							$name = $this->getPlugin()->getArenaManager()->getArenaById($args[1] - 1);
-							if ($name === null) {
+							if (!$name) {
 								return TextFormat::RED . "No arena was found by that name!";
 							}
 							$sender->sendMessage(TextFormat::GREEN . "Removing arena...");
@@ -85,7 +73,7 @@ class AddArenaCommand extends BaseArenaUserCommand {
 					case "tp":
 						if ($sender->inMatch()) return TextFormat::RED . "You can't do this while in a match!";
 						$arena = $this->getPlugin()->getArenaManager()->getArenaById($args[1] - 1);
-						if ($arena === null) {
+						if (!$arena) {
 							return TextFormat::RED . "No arena was found by that name!";
 						}
 						$sender->teleport($arena->getRandomPosition());
