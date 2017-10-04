@@ -96,7 +96,7 @@ class PartyCommand extends BaseArenaUserCommand {
 
 						$player = $sender->getParty()->getMember($args[1]);
 
-						if ($player === null) return TextFormat::RED . "That player is not in your party!";
+						if (!$player) return TextFormat::RED . "That player is not in your party!";
 
 						if ($sender === $player) return TextFormat::RED . "You can't kick yourself from the party!";
 

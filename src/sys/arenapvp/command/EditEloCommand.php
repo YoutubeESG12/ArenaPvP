@@ -32,7 +32,7 @@ class EditEloCommand extends BaseArenaCommand {
 		if ($sender->isOp()) {
 			if (isset($args[0])) {
 				if ($args[0] == "resetall") {
-					$path = $this->getPlugin()->getServer()->getPluginPath() . DIRECTORY_SEPARATOR . "Core" . DIRECTORY_SEPARATOR . "players";
+					$path = $this->getPlugin()->getDataFolder()->getPluginPath() . DIRECTORY_SEPARATOR . "players";
 					$files = scandir($path);
 					foreach ($files as $file) {
 						if (preg_match('/\.data/', $file)) {

@@ -26,6 +26,7 @@ use pocketmine\item\Item;
 use pocketmine\level\Position;
 use pocketmine\level\sound\AnvilBreakSound;
 use pocketmine\level\sound\AnvilFallSound;
+use pocketmine\level\sound\Sound;
 use pocketmine\math\Vector3;
 use pocketmine\utils\TextFormat;
 use sys\arenapvp\arena\Arena;
@@ -50,7 +51,7 @@ class Match {
 	protected $bossBar;
 
 	/** @var string */
-	private $id;
+	private $id = "";
 
 	/** @var Kit */
 	protected $kit;
@@ -95,7 +96,7 @@ class Match {
 	public function __construct(ArenaPvP $plugin, Kit $kit, array $players, Arena $arena, bool $ranked = false) {
 		$this->plugin = $plugin;
 		$this->arena = $arena;
-		$this->id = md5(mt_rand());
+		$this->id = uniqid("", true);
 		$this->bossBar = new BossBar($plugin);
 		$this->kit = $kit;
 		$this->players = $players;
@@ -274,7 +275,7 @@ class Match {
 	/**
 	 * @return bool
 	 */
-	public function hasStarted(): bool {
+	public function hasStarted() {
 		return $this->started;
 	}
 
@@ -306,17 +307,17 @@ class Match {
 			if ($this->countdown != 0) {
 				if ($this->countdown <= 3) {
 					foreach ($this->getAll() as $player) {
-						$this->getArena()->getLevel()->addSound(new AnvilFallSound($player, $this->countdown), [$player]);
+						$this->broadcastSound(new AnvilFallSound($player, $this->countdown));
 					}
+					$this->broadcastMessage(TextFormat::GREEN . "Match starting in {$this->countdown}...");
+					$this->broadcastTitle(TextFormat::GRAY . "Match starting in:", TextFormat::GREEN . "{$this->countdown}...", 1, 20, 1);
 				}
-				$this->broadcastMessage(TextFormat::GREEN . "Match starting in {$this->countdown}...");
-				$this->broadcastTitle(TextFormat::GRAY . "Match starting in:", TextFormat::GREEN . "{$this->countdown}...", 1, 20, 1);
 			} else {
 				foreach ($this->getPlayers() as $player) {
 					if ($player->isOnline()) {
 						$this->sendNameTags($player);
 						$player->reset(ArenaPlayer::SURVIVAL);
-						$this->getArena()->getLevel()->addSound(new AnvilBreakSound($player), [$player]);
+						$this->broadcastSound(new AnvilBreakSound($player));
 						$player->removeTitles();
 						$player->teleport($this->getMatchPosition($player)->add(0, 2));
 						$this->getKit()->giveKit($player);
@@ -559,6 +560,13 @@ class Match {
 		}
 	}
 
+	public function broadcastSound(Sound $sound) {
+		foreach ($this->getAll() as $player) {
+			$sound->setComponents($player->getX(), $player->getY(), $player->getZ());
+			$player->getLevel()->addSound($sound, [$player]);
+		}
+	}
+
 	public function broadcastTitle(string $title, string $subtitle = "", int $fadeIn = -1, int $stay = -1, int $fadeOut = -1) {
 		foreach ($this->getAll() as $player) {
 			$player->addTitle($title, $subtitle, $fadeIn, $stay, $fadeOut);
@@ -681,7 +689,6 @@ class Match {
 				if ($player->isSpectating()) {
 					$player->removeFromSpectating();
 				}
-				$player->setNameTag(TextFormat::GRAY . $player->getName());
 				$player->removeMatch();
 				$player->setInMatch(false);
 				$player->reset();
@@ -695,7 +702,6 @@ class Match {
 			}
 		}
 		$this->getArena()->resetArena();
-		$this->resetBlocks();
 		$this->nullify();
 	}
 

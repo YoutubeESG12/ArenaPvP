@@ -8,8 +8,6 @@
 
 namespace sys\arenapvp\arena;
 
-
-use pocketmine\block\Block;
 use pocketmine\entity\Item;
 use pocketmine\level\format\Chunk;
 use pocketmine\level\Level;
@@ -48,11 +46,11 @@ class Arena {
 	 * @param int $id
 	 * @param array $positions
 	 * @param array $edges
-	 * @param Level|null $level
+	 * @param Level $level
 	 * @param int $type
 	 * @param int $maxBuildHeight
 	 */
-	public function __construct(int $id, array $positions, array $edges, Level $level = null, int $type, int $maxBuildHeight) {
+	public function __construct(int $id, array $positions, array $edges, Level $level, int $type, int $maxBuildHeight) {
 		$this->type = $type;
 		$this->id = $id;
 		$this->level = $level;
@@ -80,8 +78,10 @@ class Arena {
 		return $this->type;
 	}
 
-
-	public function getLevel() {
+	/**
+	 * @return Level
+	 */
+	public function getLevel(): Level {
 		return $this->level;
 	}
 
@@ -94,10 +94,10 @@ class Arena {
 
 	/**
 	 * @param int $index
-	 * @return Position
+	 * @return Position|null
 	 */
-	public function getEdge(int $index): Position {
-		return $this->edges[$index];
+	public function getEdge(int $index): ?Position {
+		return $this->edges[$index] ?? null;
 	}
 
 	/**
@@ -110,7 +110,7 @@ class Arena {
 	/**
 	 * @return Position|null
 	 */
-	public function getRandomPosition(): Position {
+	public function getRandomPosition(): ?Position {
 		return $this->getPosition(array_rand($this->positions, 1));
 	}
 
@@ -118,7 +118,7 @@ class Arena {
 	 * @param int $index
 	 * @return Position|null
 	 */
-	public function getPosition(int $index): Position {
+	public function getPosition(int $index): ?Position {
 		return $this->positions[$index] ?? null;
 	}
 
@@ -163,7 +163,7 @@ class Arena {
 	 * @return bool
 	 */
 	public function chunkExists(Chunk $chunk): bool {
-		return isset($this->chunks[$chunk->getX() . $chunk->getZ()]);
+		return isset($this->chunks[Level::chunkHash($chunk->getX(), $chunk->getZ())]);
 	}
 
 	/**
@@ -173,7 +173,7 @@ class Arena {
 		$this->chunks[$chunk->getX() . $chunk->getZ()] = $chunk->fastSerialize();
 	}
 
-	public function saveChunks($saveLevel = false){
+	public function saveChunks() {
 		$this->resetChunks();
 		$pos1 = $this->getEdge(0);
 		$pos2 = $this->getEdge(1);
@@ -189,31 +189,12 @@ class Arena {
 			}
 		}
 		MainLogger::getLogger()->debug("Arena #" . ($this->getId() + 1) . " > " . count($this->getChunks()) . " chunks saved!");
-		if ($saveLevel) $this->getLevel()->save();
 	}
 
 	public function removeItemEntities(Chunk $chunk) {
 		foreach ($chunk->getEntities() as $entity) {
 			if ($entity instanceof Item) {
 				$entity->close();
-			}
-		}
-	}
-
-	public function removeBlocks() {
-		$blacklisted = [Block::FLOWING_WATER, Block::WATER, Block::FLOWING_LAVA, Block::FLOWING_WATER, Block::COBBLESTONE, Block::WOODEN_PLANKS];
-		foreach ($this->getChunks() as $chunkString) {
-			$chunk = Chunk::fastDeserialize($chunkString);
-			$chunkX = $chunk->getX() << 4;
-			$chunkZ = $chunk->getZ() << 4;
-			for ($x = $chunkX; $x < $chunkX + 16; $x++) {
-				for ($z = $chunkZ; $z < $chunkZ + 16; $z++) {
-					for ($y = 0; $y < 128; $y++) {
-						if (in_array($this->getLevel()->getBlockIdAt($x, $y, $z), $blacklisted)) {
-							$this->getLevel()->setBlock(new Vector3($x, $y, $z), Block::get(Block::AIR));
-						}
-					}
-				}
 			}
 		}
 	}

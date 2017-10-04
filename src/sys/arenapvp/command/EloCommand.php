@@ -38,7 +38,7 @@ class EloCommand extends BaseArenaUserCommand {
 				$sender->sendMessage(TextFormat::GRAY . $elo->getKit()->getName() . ": " . TextFormat::GOLD . $elo->getElo());
 			}
 		} else if (is_string($player)) {
-			$path = $this->getPlugin()->getServer()->getPluginPath() . DIRECTORY_SEPARATOR . "Core" . DIRECTORY_SEPARATOR . "players";
+			$path = $this->getPlugin()->getDataFolder() . DIRECTORY_SEPARATOR . "players";
 			$files = scandir($path);
 			foreach ($files as $file) {
 				if ($file == strtolower($player) . ".data") {

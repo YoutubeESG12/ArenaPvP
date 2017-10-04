@@ -118,10 +118,10 @@ class KitManager {
 	 */
 	public function parseArmor(array $data): array {
 		$parsedArmor = [];
-		$armor[] = $data["helmet"];
-		$armor[] = $data["chestplate"];
-		$armor[] = $data["leggings"];
-		$armor[] = $data["boots"];
+		$armor[] = $data["helmet"] ?? [0];
+		$armor[] = $data["chestplate"] ?? [0];
+		$armor[] = $data["leggings"] ?? [0];
+		$armor[] = $data["boots"] ?? [0];
 		foreach ($armor as $item) {
 			$parsedItem = Item::get($item[0]);
 			if (isset($item[1])) {

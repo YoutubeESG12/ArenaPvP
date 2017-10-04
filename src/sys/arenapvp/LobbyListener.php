@@ -191,7 +191,6 @@ class LobbyListener extends BaseListener {
 		if ($player instanceof ArenaPlayer) {
 			$player->loadData();
 			$player->loadElo();
-			$player->setNameTag(TextFormat::GRAY . $player->getName());
 			$player->reset();
 			$this->getPlugin()->getArenaManager()->addLobbyItems($player);
 		}
@@ -265,7 +264,6 @@ class LobbyListener extends BaseListener {
 					$player->setHasDuelRequest(false);
 					$player->sendArgsMessage(TextFormat::GREEN . "You have denied {0}'s duel request!", $menu->getOpponent()->getName());
 					$menu->getOpponent()->sendArgsMessage(TextFormat::RED . "{0} has denied your duel request!", $player->getName());
-					return;
 				}
 				$player->removeMenu();
 			}

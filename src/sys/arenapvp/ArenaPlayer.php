@@ -80,12 +80,6 @@ class ArenaPlayer extends Player {
 	private $unrankedMatchesLeft = 40;
 
 	/** @var bool */
-	private $jumping = false;
-
-	/** @var float */
-	private $flightDistance = 0.0;
-
-	/** @var bool */
 	private $duelRequest = false;
 
 	/** @var bool */
@@ -96,9 +90,6 @@ class ArenaPlayer extends Player {
 
 	/** @var Match */
 	private $spectatingMatch = null;
-
-	/** @var array */
-	private $hackSuspicion = [];
 
 	/** @var Menu */
 	private $menu = null;
@@ -162,6 +153,9 @@ class ArenaPlayer extends Player {
 		$this->os = $os;
 	}
 
+	/**
+	 * TODO: Implement command sending
+	 */
 	public function sendCommandData() {
 		parent::sendCommandData();
 	}
@@ -235,7 +229,7 @@ class ArenaPlayer extends Player {
 	public function removeFromQueue() {
 		if($this->inQueue()) {
 			$this->getQueue()->removePlayer($this);
-			$this->setQueue(null);
+			$this->queue = null;
 		}
 	}
 
@@ -447,7 +441,7 @@ class ArenaPlayer extends Player {
 	 * @return bool
 	 */
 	public function isSpectating(): bool {
-		return $this->spectatingMatch !== null;
+		return $this->spectatingMatch instanceof Match;
 	}
 
 	public function dropAllItems() {
@@ -462,7 +456,7 @@ class ArenaPlayer extends Player {
 		foreach ($this->getServer()->getOnlinePlayers() as $player) {
 			$player->showPlayer($this);
 		}
-		if ($this->spectatingMatch !== null) {
+		if ($this->isSpectating()) {
 			$this->spectatingMatch->getBossBar()->removeBossBar($this);
 			$this->spectatingMatch = null;
 		}
@@ -481,52 +475,6 @@ class ArenaPlayer extends Player {
 		$this->setFood($this->getMaxFood());
 		$this->setSaturation($this->getAttributeMap()->getAttribute(Attribute::SATURATION)->getMaxValue()); //no constant? oh well
 		$this->setHealth($this->getMaxHealth());
-	}
-
-	/**
-	 * @return bool
-	 */
-	public function isJumping(): bool {
-		return $this->jumping;
-	}
-
-	public function setJumping(bool $value = true) {
-		$this->jumping = $value;
-	}
-
-	public function addFlightDistance(float $distance) {
-		$this->flightDistance += $distance;
-	}
-
-	public function subtractFlightDistance(float $distance) {
-		$this->flightDistance -= $distance;
-	}
-
-	public function setFlightDistance(float $distance) {
-		$this->flightDistance = $distance;
-	}
-
-	/**
-	 * @return float
-	 */
-	public function getFlightDistance(): float {
-		return $this->flightDistance;
-	}
-
-	public function addSuspicion(string $hack, int $score = 1) {
-		if (!isset($this->hackSuspicion[$hack])) {
-			$this->hackSuspicion[$hack] = $score;
-			return;
-		}
-		$this->hackSuspicion[$hack] += $score;
-	}
-
-	/**
-	 * @param string $hack
-	 * @return int|null
-	 */
-	public function getSuspicion(string $hack): ?int {
-		return $this->hackSuspicion[$hack] ?? null;
 	}
 
 }

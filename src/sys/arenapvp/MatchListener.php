@@ -20,7 +20,6 @@ use pocketmine\event\player\PlayerInteractEvent;
 use pocketmine\event\player\PlayerKickEvent;
 use pocketmine\event\player\PlayerQuitEvent;
 use sys\arenapvp\basefiles\BaseListener;
-use sys\arenapvp\match\Match;
 
 
 class MatchListener extends BaseListener {
@@ -44,7 +43,7 @@ class MatchListener extends BaseListener {
 
 	public function onCraft(CraftItemEvent $event): void {
 		$player = $event->getPlayer();
-		if ($player instanceof ArenaPlayer and $player->getMatch() instanceof Match) {
+		if ($player instanceof ArenaPlayer and $player->inMatch()) {
 			$event->setCancelled();
 		}
 	}

@@ -105,7 +105,17 @@ class BossBar {
 		foreach ($this->getPlayers() as $player) {
 			$player->dataPacket($pk);
 		}
+	}
 
+	/**
+	 * @param string $title
+	 * @param string[] ...$args
+	 */
+	public function setBossBarTitleWithArgs(string $title, string ...$args) {
+		for ($i = 0; $i < count($args); $i++) {
+			$title = str_replace("{" . $i . "}", $args[$i], $title);
+		}
+		$this->setBossBarTitle($title);
 	}
 
 	public function setEntitySize(float $size) {
