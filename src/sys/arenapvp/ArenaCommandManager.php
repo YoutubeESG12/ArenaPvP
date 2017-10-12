@@ -42,9 +42,9 @@ class ArenaCommandManager {
 
 	/**
 	 * @param string $commandName
-	 * @return string|null
+	 * @return array|null
 	 */
-	public function getIndividualCommandData(string $commandName): ?string {
+	public function getIndividualCommandData(string $commandName): ?array {
 		return $this->commandData[$commandName] ?? null;
 	}
 

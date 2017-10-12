@@ -477,4 +477,22 @@ class ArenaPlayer extends Player {
 		$this->setHealth($this->getMaxHealth());
 	}
 
+	public function logOut() {
+		if ($this->inQueue()) {
+			$this->removeFromQueue();
+		}
+		if ($this->getMain()->getPartyManager()->hasInviteObject($this)) {
+			$this->getMain()->getPartyManager()->removeHostObject($this);
+		}
+		if ($this->inParty()) {
+			if ($this->getName() === $this->getParty()->getLeader()->getName()) {
+				$this->getMain()->getPartyManager()->removeParty($this->getParty());
+				$this->getParty()->disbandParty();
+			} else {
+				$party = $this->getParty();
+				$party->removePlayer($this);
+			}
+		}
+	}
+
 }

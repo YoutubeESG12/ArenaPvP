@@ -19,7 +19,6 @@ use pocketmine\event\inventory\InventoryPickupItemEvent;
 use pocketmine\event\inventory\InventoryTransactionEvent;
 use pocketmine\event\player\PlayerCreationEvent;
 use pocketmine\event\player\PlayerDeathEvent;
-use pocketmine\event\player\PlayerDropItemEvent;
 use pocketmine\event\player\PlayerExhaustEvent;
 use pocketmine\event\player\PlayerInteractEvent;
 use pocketmine\event\player\PlayerJoinEvent;
@@ -60,54 +59,17 @@ class LobbyListener extends BaseListener {
 	public function onQuit(PlayerQuitEvent $event): void {
 		$player = $event->getPlayer();
 		if ($player instanceof ArenaPlayer) {
-			if ($player->inQueue()) {
-				$player->removeFromQueue();
-			}
-			if ($this->getPlugin()->getPartyManager()->hasInviteObject($player)) {
-				$this->getPlugin()->getPartyManager()->removeHostObject($player);
-			}
-			if ($player->inParty()) {
-				if ($player->getName() === $player->getParty()->getLeader()->getName()) {
-					$this->getPlugin()->getPartyManager()->removeParty($player->getParty());
-					$player->getParty()->disbandParty();
-				} else {
-					$party = $player->getParty();
-					$party->removePlayer($player);
-				}
-			}
+			$player->logOut();
 		}
 	}
 
 	public function onKick(PlayerKickEvent $event): void {
 		$player = $event->getPlayer();
 		if ($player instanceof ArenaPlayer) {
-			if ($player->inQueue()) {
-				$player->removeFromQueue();
-			}
-			if ($this->getPlugin()->getPartyManager()->hasInviteObject($player)) {
-				$this->getPlugin()->getPartyManager()->removeHostObject($player);
-			}
-			if ($player->inParty()) {
-				if ($player->getName() === $player->getParty()->getLeader()->getName()) {
-					$this->getPlugin()->getPartyManager()->removeParty($player->getParty());
-					$player->getParty()->disbandParty();
-				} else {
-					$party = $player->getParty();
-					$party->removePlayer($player);
-				}
-			}
+			$player->logOut();
 		}
 	}
-
-	public function onDropItem(PlayerDropItemEvent $event): void {
-		$player = $event->getPlayer();
-		if ($player instanceof ArenaPlayer) {
-			if (!$player->getMatch() instanceof Match and !$player->isOp()) {
-				$event->setCancelled();
-			}
-		}
-	}
-
+	
 	public function onPickup(InventoryPickupItemEvent $event): void {
 		$player = $event->getInventory()->getHolder();
 		if ($player instanceof ArenaPlayer) {
@@ -216,9 +178,12 @@ class LobbyListener extends BaseListener {
 			$transaction = $action;
 		}
 
-		$item = $transaction->getSourceItem()->getId() == 0 ? $transaction->getTargetItem() : $transaction->getSourceItem();
+
+		$item = $transaction->getTargetItem()->getId() == 0 ? $transaction->getSourceItem() : $transaction->getTargetItem();
 		if ($player instanceof ArenaPlayer and $chestInventory instanceof ArenaChestInventory and $item instanceof Item and $player->inMenu()) {
 			$player->getMenu()->getInteraction($player, $chestInventory, $item);
+			var_dump($transaction->getSourceItem()->__toString());
+			var_dump($transaction->getTargetItem()->__toString());
 			$event->setCancelled();
 		}
 

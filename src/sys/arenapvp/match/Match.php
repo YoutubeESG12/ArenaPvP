@@ -28,6 +28,7 @@ use pocketmine\level\sound\AnvilBreakSound;
 use pocketmine\level\sound\AnvilFallSound;
 use pocketmine\level\sound\Sound;
 use pocketmine\math\Vector3;
+use pocketmine\utils\MainLogger;
 use pocketmine\utils\TextFormat;
 use sys\arenapvp\arena\Arena;
 use sys\arenapvp\ArenaPlayer;
@@ -37,6 +38,9 @@ use sys\arenapvp\task\DeathTask;
 use sys\arenapvp\utils\BossBar;
 
 class Match {
+
+	/** @var ArenaPvP */
+	protected $plugin;
 
 	/** @var int */
 	protected $countdown = 10;
@@ -56,12 +60,6 @@ class Match {
 	/** @var Kit */
 	protected $kit;
 
-	/** @var bool */
-	protected $started = false;
-
-	/** @var bool */
-	protected $ended = false;
-
 	/** @var ArenaPlayer[] */
 	private $matchPlayers = [];
 
@@ -71,11 +69,14 @@ class Match {
 	/** @var ArenaPlayer[] */
 	protected $spectators = [];
 
-	/** @var ArenaPvP */
-	protected $plugin;
+	/** @var bool */
+	protected $ended = false;
 
 	/** @var bool */
 	private $ranked = false;
+
+	/** @var bool */
+	protected $started = false;
 
 	/** @var Vector3[] */
 	private $blocksPlaced = [];
@@ -102,12 +103,14 @@ class Match {
 		$this->players = $players;
 		$this->matchPlayers = $players;
 		$this->ranked = $ranked;
+		$this->started = false; //TODO: Find out Match::$started bug.
 		$this->init();
 	}
 
 	public function teleportPlayers() {
 		foreach ($this->getPlayers() as $player) {
-			$player->teleport(Position::fromObject($this->getMatchPosition($player)->add(0, 2), $this->getArena()->getLevel()));
+			$position = Position::fromObject($this->getMatchPosition($player)->add(0, 2), $this->getMatchPosition($player)->getLevel());
+			$player->teleport($position);
 		}
 	}
 
@@ -119,7 +122,7 @@ class Match {
 	 * @param ArenaPlayer $player
 	 * @return Position|null
 	 */
-	public function getMatchPosition(ArenaPlayer $player) {
+	public function getMatchPosition(ArenaPlayer $player): ?Position {
 		return $this->positions[$player->getName()] ?? null;
 	}
 
@@ -275,7 +278,11 @@ class Match {
 	/**
 	 * @return bool
 	 */
-	public function hasStarted() {
+	public function hasStarted(): ?bool {
+		if (!isset($this->started)) {
+			MainLogger::getLogger()->error("Variable not set!");
+			var_dump($this->started);
+		}
 		return $this->started;
 	}
 
@@ -642,6 +649,10 @@ class Match {
 	public function handleDeath(ArenaPlayer $player, $leaving = false) {
 		if ($this->isPlayer($player)) {
 			$this->removePlayer($player);
+			if (!$leaving) {
+				$this->addSpectator($player, true);
+				$player->setHealth($player->getMaxHealth());
+			}
 			if (count($this->getPlayers()) > 1) {
 				$player->dropAllItems();
 			} else {
@@ -656,16 +667,12 @@ class Match {
 					$player->sendArgsMessage(TextFormat::GREEN . "Winner: {0}", $this->getWinner()->getName());
 				}
 			}
-			if (!$leaving) {
-				$this->addSpectator($player, true);
-				$player->setHealth($player->getMaxHealth());
-			}
 		}
 	}
 
 	public function triggerKillTask() {
-		new DeathTask($this->getPlugin(), $this);
 		$this->setEnded();
+		new DeathTask($this->getPlugin(), $this);
 	}
 
 	public function resetBlocks() {
@@ -685,21 +692,19 @@ class Match {
 			$loser->getElo($this->getKit())->calculateNewElo($this->getWinner(), $loser);
 		}
 		foreach ($this->getAll() as $player) {
-			if ($player->isOnline()) {
-				if ($player->isSpectating()) {
-					$player->removeFromSpectating();
-				}
-				$player->removeMatch();
-				$player->setInMatch(false);
-				$player->reset();
-				$this->getBossBar()->removeBossBar($player);
-				if ($player->isFlying()) {
-					$player->setFlying(false);
-					$player->setAllowFlight(false);
-				}
-				$player->teleport($this->getPlugin()->getServer()->getDefaultLevel()->getSpawnLocation());
-				$this->getPlugin()->getArenaManager()->addLobbyItems($player);
+			if ($player->isSpectating()) {
+				$player->removeFromSpectating();
 			}
+			$player->removeMatch();
+			$player->setInMatch(false);
+			$player->reset();
+			$this->getBossBar()->removeBossBar($player);
+			if ($player->isFlying()) {
+				$player->setFlying(false);
+				$player->setAllowFlight(false);
+			}
+			$player->teleport($this->getPlugin()->getServer()->getDefaultLevel()->getSpawnLocation());
+			$this->getPlugin()->getArenaManager()->addLobbyItems($player);
 		}
 		$this->getArena()->resetArena();
 		$this->nullify();
