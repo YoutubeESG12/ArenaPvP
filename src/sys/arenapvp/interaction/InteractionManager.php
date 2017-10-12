@@ -81,12 +81,11 @@ class InteractionManager {
 	}
 
 	public function addInteraction(Interaction $interaction) {
-		$this->interactions[] = $interaction;
+		$this->interactions[spl_object_hash($interaction)] = $interaction;
 	}
 
 	public function removeInteraction(Interaction $interaction) {
-		$index = array_search($interaction, $this->getInteractions());
-		if($index !== false) unset($this->interactions[$index]);
+		if (isset($this->interactions[spl_object_hash($interaction)])) unset($this->interactions[spl_object_hash($interaction)]);
 	}
 
 
