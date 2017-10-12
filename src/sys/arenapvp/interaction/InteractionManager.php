@@ -11,6 +11,7 @@ namespace sys\arenapvp\interaction;
 
 
 use pocketmine\item\Item;
+use sys\arenapvp\ArenaPlayer;
 use sys\arenapvp\ArenaPvP;
 use sys\arenapvp\interaction\defaults\LobbyInteraction;
 use sys\arenapvp\interaction\defaults\QueueInteraction;
@@ -62,6 +63,21 @@ class InteractionManager {
 		]);
 		$this->addInteraction($spectatingInteraction);
 
+	}
+
+	/**
+	 * @param Item $item
+	 * @param ArenaPlayer $player
+	 * @return bool
+	 */
+	public function matchesInteraction(Item $item, ArenaPlayer $player): boolean {
+		foreach ($this->getPlugin()->getInteractionManager()->getInteractions() as $interaction) {
+			if ($interaction->exists($item)) {
+				$interaction->onInteract($player, $item);
+				return true;
+			}
+		}
+		return false;
 	}
 
 	public function addInteraction(Interaction $interaction) {

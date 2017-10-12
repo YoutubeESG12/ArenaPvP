@@ -69,7 +69,7 @@ class LobbyListener extends BaseListener {
 			$player->logOut();
 		}
 	}
-	
+
 	public function onPickup(InventoryPickupItemEvent $event): void {
 		$player = $event->getInventory()->getHolder();
 		if ($player instanceof ArenaPlayer) {
@@ -97,11 +97,8 @@ class LobbyListener extends BaseListener {
 		if ($action !== PlayerInteractEvent::LEFT_CLICK_AIR) {
 			if ($player instanceof ArenaPlayer and !$player->inMenu()) {
 				$item = $event->getItem();
-				foreach ($this->getPlugin()->getInteractionManager()->getInteractions() as $interaction) {
-					if ($interaction->exists($item)) {
-						$event->setCancelled();
-						$interaction->onInteract($player, $item);
-					}
+				if ($this->getPlugin()->getInteractionManager()->matchesInteraction($item, $player)) {
+					$event->setCancelled();
 				}
 			}
 		}
