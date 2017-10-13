@@ -678,12 +678,13 @@ class Match {
 	}
 
 	public function kill() {
-
 		if ($this->isRanked()) {
 			$loser = $this->getOtherPlayer($this->getWinner());
 			$this->getWinner()->getElo($this->getKit())->calculateNewElo($this->getWinner(), $loser);
 			$loser->getElo($this->getKit())->calculateNewElo($this->getWinner(), $loser);
 		}
+
+		$this->nullify();
 	}
 
 	public function nullify() {
