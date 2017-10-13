@@ -131,7 +131,7 @@ class BossBar {
 		$pk = new AddEntityPacket();
 		$pk->entityRuntimeId = self::ENTITY_ID;
 		$pk->type = Squid::NETWORK_ID;
-		$pk->position = $player->getPosition()->subtract(0, self::$Y_SUBTRACTION);
+		$pk->position = $player->subtract(0, self::$Y_SUBTRACTION);
 		$pk->motion = new Vector3(0, 0, 0);
 		$pk->yaw = 0.0;
 		$pk->pitch = 0.0;
@@ -147,7 +147,7 @@ class BossBar {
 	public function moveEntity(ArenaPlayer $player) {
 		$pk = new MoveEntityPacket();
 		$pk->entityRuntimeId = self::ENTITY_ID;
-		$pk->position = $player->getPosition()->subtract(0, self::$Y_SUBTRACTION);
+		$pk->position = $player->subtract(0, self::$Y_SUBTRACTION);
 		$pk->pitch = 0;
 		$pk->headYaw = 0;
 		$pk->yaw = 0;

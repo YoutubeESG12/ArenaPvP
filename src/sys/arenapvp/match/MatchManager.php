@@ -9,6 +9,7 @@
 namespace sys\arenapvp\match;
 
 use pocketmine\utils\TextFormat;
+use sys\arenapvp\arena\Arena;
 use sys\arenapvp\ArenaPlayer;
 use sys\arenapvp\ArenaPvP;
 use sys\arenapvp\kit\Kit;
@@ -67,9 +68,10 @@ class MatchManager {
 	 * @param Kit $kit
 	 * @param bool $teams
 	 */
-	public function createMatch(array $players, Kit $kit, $teams = false) {
+	public function createMatch(array $players, Kit $kit, bool $teams = false) {
 		$arena = $this->getPlugin()->getArenaManager()->getOpenArena($kit->getMapType());
-		if ($arena !== null) {
+		if ($arena instanceof Arena) {
+			$arena->setInUse();
 			new MatchTask($this->getPlugin(), $players, $kit, $arena, $teams);
 		} else {
 			foreach ($players as $player) {

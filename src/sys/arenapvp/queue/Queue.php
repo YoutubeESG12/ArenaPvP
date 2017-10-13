@@ -11,6 +11,7 @@ namespace sys\arenapvp\queue;
 
 
 use pocketmine\utils\TextFormat;
+use sys\arenapvp\arena\Arena;
 use sys\arenapvp\ArenaPlayer;
 use sys\arenapvp\ArenaPvP;
 use sys\arenapvp\kit\Kit;
@@ -96,7 +97,7 @@ class Queue {
 	 * @param int $count
 	 * @return ArenaPlayer[]
 	 */
-	public function getRandomPlayers($count = 2) {
+	public function getRandomPlayers($count = 2): array {
 		$playerIndexes = array_rand($this->getPlayers(), $count);
 		/** @var ArenaPlayer[] $players */
 		$players = [];
@@ -117,15 +118,11 @@ class Queue {
 	public function pickMatch() {
 		if($this->getCount() >= 2) {
 			$arena = $this->getPlugin()->getArenaManager()->getOpenArena($this->getKit()->getMapType());
-			if ($arena !== null) {
+			if ($arena instanceof Arena) {
 				$players = $this->getRandomPlayers();
 				new MatchTask($this->getPlugin(), $players, $this->getKit(), $arena, false, $this->isRanked());
 				foreach ($players as $player) {
-					if ($this->isRanked()) {
-						$player->sendMessage(TextFormat::GREEN . "Found a ranked match!");
-					} else {
-						$player->sendMessage(TextFormat::GREEN . "Found an unranked match!");
-					}
+					$player->sendArgsMessage(TextFormat::GREEN . "Found a {0} match!", ($this->isRanked() ? "ranked" : "unranked"));
 					$this->removePlayer($player);
 				}
 			}

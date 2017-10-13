@@ -23,7 +23,8 @@ class Party {
 	/** @var ArenaPlayer[] */
 	private $players = [];
 
-	public static $MAX_PLAYERS = 25;
+	/** @var int */
+	public static $MAX_PLAYERS = 25; //TODO: Add option to customize max party size.
 
 	public function __construct(ArenaPlayer $leader, array $players = []) {
 		$this->leader = $leader;
@@ -51,7 +52,11 @@ class Party {
 		return $this->players;
 	}
 
-	public function getMember($name) {
+	/**
+	 * @param $name
+	 * @return null|ArenaPlayer
+	 */
+	public function getMember($name): ?ArenaPlayer {
 		if ($name instanceof ArenaPlayer) {
 			$name = $name->getName();
 		}
@@ -70,7 +75,7 @@ class Party {
 	/**
 	 * @return ArenaPlayer[]
 	 */
-	public function getOnlineMembers() {
+	public function getOnlineMembers(): array {
 		$members = [];
 		foreach ($this->getMembers() as $member) {
 			if ($member->isOnline()) {
@@ -94,7 +99,7 @@ class Party {
 	public function removePlayer(ArenaPlayer $player) {
 		if (isset($this->players[$player->getName()]) and $player !== $this->getLeader()) {
 			unset($this->players[$player->getName()]);
-			$player->setParty(null);
+			$player->removeFromParty();
 		}
 		$this->broadcastMessage(TextFormat::GREEN . $player->getName() . " has left the party!");
 	}

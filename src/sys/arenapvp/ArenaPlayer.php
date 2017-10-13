@@ -303,23 +303,30 @@ class ArenaPlayer extends Player {
 	/**
 	 * @param Party|null $party
 	 */
-	public function setParty($party) {
+	public function setParty(?Party $party) {
 		$this->party = $party;
 	}
 
-	public function getParty() {
+	public function removeFromParty() {
+		$this->setParty(null);
+	}
+
+	/**
+	 * @return null|Party
+	 */
+	public function getParty(): ?Party {
 		return $this->party;
 	}
 
 	public function inParty(): bool {
-		return $this->party !== null;
+		return $this->party instanceof Party;
 	}
 
 	/**
 	 * @param string $name
 	 * @param ArenaPlayer[] $players
 	 */
-	public function setCustomNameTag(string $name, $players) {
+	public function setCustomNameTag(string $name, array $players) {
 		foreach ($players as $player) {
 			$this->sendData($player, [self::DATA_NAMETAG => [self::DATA_TYPE_STRING, $name]]);
 		}

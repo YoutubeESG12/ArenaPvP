@@ -10,6 +10,7 @@ namespace sys\arenapvp\match;
 
 
 use pocketmine\block\Block;
+use pocketmine\block\Planks;
 use pocketmine\entity\Arrow;
 use pocketmine\entity\Effect;
 use pocketmine\event\block\BlockBreakEvent;
@@ -28,13 +29,11 @@ use pocketmine\level\sound\AnvilBreakSound;
 use pocketmine\level\sound\AnvilFallSound;
 use pocketmine\level\sound\Sound;
 use pocketmine\math\Vector3;
-use pocketmine\utils\MainLogger;
 use pocketmine\utils\TextFormat;
 use sys\arenapvp\arena\Arena;
 use sys\arenapvp\ArenaPlayer;
 use sys\arenapvp\ArenaPvP;
 use sys\arenapvp\kit\Kit;
-use sys\arenapvp\task\DeathTask;
 use sys\arenapvp\utils\BossBar;
 
 class Match {
@@ -47,6 +46,9 @@ class Match {
 
 	/** @var int */
 	protected $time = 60 * 15;
+
+	/** @var int */
+	protected $finishTime = 3;
 
 	/** @var Arena */
 	protected $arena;
@@ -103,7 +105,6 @@ class Match {
 		$this->players = $players;
 		$this->matchPlayers = $players;
 		$this->ranked = $ranked;
-		$this->started = false; //TODO: Find out Match::$started bug.
 		$this->init();
 	}
 
@@ -153,7 +154,7 @@ class Match {
 
 	protected function init() {
 		if (count($this->players) <= 1) {
-			$this->kill();
+			$this->reset();
 			return;
 		}
 		$this->shufflePlayers();
@@ -276,13 +277,9 @@ class Match {
 	}
 
 	/**
-	 * @return bool
+	 * @return null|bool
 	 */
 	public function hasStarted(): ?bool {
-		if (!isset($this->started)) {
-			MainLogger::getLogger()->error("Variable not set!");
-			var_dump($this->started);
-		}
 		return $this->started;
 	}
 
@@ -337,7 +334,13 @@ class Match {
 		} else {
 			$this->time--;
 			if (count($this->getPlayers()) <= 1 and !$this->hasEnded()) {
-				$this->triggerKillTask();
+				$this->setEnded();
+			}
+			if ($this->hasEnded()) {
+				$this->finishTime--;
+				if ($this->finishTime <= 0) {
+					$this->kill();
+				}
 			}
 			$this->handleMessages();
 			foreach ($this->getAll() as $player) $this->getBossBar()->moveEntity($player);
@@ -350,9 +353,9 @@ class Match {
 	}
 
 	/**
-	 * @return bool
+	 * @return null|bool
 	 */
-	public function isRanked(): bool {
+	public function isRanked(): ?bool {
 		return $this->ranked;
 	}
 
@@ -430,7 +433,7 @@ class Match {
 						$shooter = $child->getOwningEntity();
 						if($shooter instanceof ArenaPlayer) {
 							if($this->getKit()->isKit("BuildUHC") or $this->getKit()->isKit("Archer")) {
-								$shooter->sendMessage(TextFormat::GREEN . $entity->getName() . " has " . (round(($entity->getHealth() - $event->getFinalDamage()) / 2)) . " hearts left!");
+								$shooter->sendArgsMessage(TextFormat::GREEN . $entity->getName() . " has {0} hearts left!", (round(($entity->getHealth() - $event->getFinalDamage()) / 2)));
 							}
 							$shooter->getLevel()->addSound(new AnvilFallSound($shooter->getPosition()), [$shooter]);
 						}
@@ -502,24 +505,18 @@ class Match {
 			if ($block->getY() > $this->getArena()->getMaxBuildHeight()) {
 				$event->setCancelled();
 				$player->sendMessage(TextFormat::RED . "You can't build over the height limit!");
-			} else {
-				$this->addBlockPlaced($event->getBlockReplaced());
 			}
 		}
 	}
 
 	public function onBreak(BlockBreakEvent $event) {
 		$player = $event->getPlayer();
-		if ($this->getKit()->canBuild()) {
-			if ($player instanceof ArenaPlayer and $player->inMatch()) {
-				$id = $event->getBlock()->getId();
-				if ($id !== Block::COBBLESTONE and $id !== Block::WOODEN_PLANKS) { //TODO: Whitelisted block lists
-					$event->setCancelled();
-				} else if ($id == Block::WOODEN_PLANKS and $event->getBlock()->getDamage() > 0) {
-					$event->setCancelled();
-				} else {
-					$this->removeBlockPlaced($event->getBlock());
-				}
+		if ($this->getKit()->canBuild() and $player instanceof ArenaPlayer and $player->inMatch()) {
+			$id = $event->getBlock()->getId();
+			if ($id !== Block::COBBLESTONE and $id !== Block::WOODEN_PLANKS) { //TODO: Whitelisted block lists
+				$event->setCancelled();
+			} else if ($id == Block::WOODEN_PLANKS and $event->getBlock()->getDamage() > Planks::OAK) {
+				$event->setCancelled();
 			}
 		} else {
 			$event->setCancelled();
@@ -547,23 +544,6 @@ class Match {
 				}
 				$this->handleDeath($player, true);
 			}
-		}
-	}
-
-	/**
-	 * @return Vector3[]
-	 */
-	public function getBlocksPlaced(): array {
-		return $this->blocksPlaced;
-	}
-
-	public function addBlockPlaced(Vector3 $vector3) {
-		$this->blocksPlaced[$vector3->getX().$vector3->getY().$vector3->getZ()] = $vector3;
-	}
-
-	public function removeBlockPlaced(Vector3 $vector3) {
-		if(isset($this->blocksPlaced[$vector3->getX() . $vector3->getY() . $vector3->getZ()])) {
-			unset($this->blocksPlaced[$vector3->getX() . $vector3->getY() . $vector3->getZ()]);
 		}
 	}
 
@@ -620,10 +600,13 @@ class Match {
 
 	/**
 	 * @param string $message
+	 * @param int $fadeIn
+	 * @param int $stay
+	 * @param int $fadeOut
 	 */
-	public function broadcastActionBar(string $message) {
+	public function broadcastActionBar(string $message, int $fadeIn = -1, int $stay = -1, int $fadeOut = -1) {
 		foreach ($this->getAll() as $player) {
-			$player->setTitleDuration(20, 1000, 20);
+			$player->setTitleDuration($fadeIn, $stay, $fadeOut);
 			$player->addActionBarMessage($message);
 		}
 	}
@@ -656,7 +639,7 @@ class Match {
 			if (count($this->getPlayers()) > 1) {
 				$player->dropAllItems();
 			} else {
-				$this->triggerKillTask();
+				$this->setEnded();
 				$player->getLevel()->dropItem($player->getPosition(), $player->getInventory()->getItemInHand());
 				foreach ($this->getPlayers() as $arenaPlayer) {
 					$arenaPlayer->setHealth($player->getMaxHealth());
@@ -670,27 +653,9 @@ class Match {
 		}
 	}
 
-	public function triggerKillTask() {
-		$this->setEnded();
-		new DeathTask($this->getPlugin(), $this);
-	}
-
-	public function resetBlocks() {
-		foreach ($this->getBlocksPlaced() as $block) {
-			if ($this->getArena()->getLevel()->getBlockIdAt($block->x, $block->y, $block->z) !== Block::AIR) {
-				$this->getArena()->getLevel()->setBlock($block, Block::get(Block::AIR));
-			}
-		}
-	}
-
-	public function kill() {
+	public function reset() {
 		$this->getPlugin()->getMatchManager()->removeMatch($this);
-		/* TODO: Clean this up! */
-		if ($this->isRanked()) {
-			$loser = $this->getOtherPlayer($this->getWinner());
-			$this->getWinner()->getElo($this->getKit())->calculateNewElo($this->getWinner(), $loser);
-			$loser->getElo($this->getKit())->calculateNewElo($this->getWinner(), $loser);
-		}
+
 		foreach ($this->getAll() as $player) {
 			if ($player->isSpectating()) {
 				$player->removeFromSpectating();
@@ -703,11 +668,22 @@ class Match {
 				$player->setFlying(false);
 				$player->setAllowFlight(false);
 			}
+			//TODO: Add customization
 			$player->teleport($this->getPlugin()->getServer()->getDefaultLevel()->getSpawnLocation());
 			$this->getPlugin()->getArenaManager()->addLobbyItems($player);
 		}
 		$this->getArena()->resetArena();
-		$this->nullify();
+
+		$this->kill();
+	}
+
+	public function kill() {
+
+		if ($this->isRanked()) {
+			$loser = $this->getOtherPlayer($this->getWinner());
+			$this->getWinner()->getElo($this->getKit())->calculateNewElo($this->getWinner(), $loser);
+			$loser->getElo($this->getKit())->calculateNewElo($this->getWinner(), $loser);
+		}
 	}
 
 	public function nullify() {

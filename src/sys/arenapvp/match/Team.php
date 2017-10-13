@@ -89,7 +89,7 @@ class Team {
 	 */
 	public function __toString(): string {
 		$string = "[";
-		foreach($this->getPlayers() as $player) $string .= $player->getPlayerName() . ", ";
+		foreach ($this->getPlayers() as $player) $string .= $player->getName() . ", ";
 		//$string .= implode(", ", array_keys($this->getPlayers())); buggy, need to think of a better solution
 		$string = rtrim($string, ",");
 		$string .= "]";

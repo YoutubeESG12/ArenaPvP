@@ -163,7 +163,7 @@ class ArenaManager {
 	 * @param int $type
 	 * @return Arena|null
 	 */
-	public function getOpenArena(int $type) {
+	public function getOpenArena(int $type): ?Arena {
 		if (count($this->getOpenArenas()) > 0) {
 			$typeArenas = [];
 			foreach ($this->getOpenArenas() as $arena) {
@@ -195,6 +195,7 @@ class ArenaManager {
 	}
 
 	/**
+	 * TODO: Customization
 	 * @return Item[]
 	 */
 	public function getLobbyItems(): array {

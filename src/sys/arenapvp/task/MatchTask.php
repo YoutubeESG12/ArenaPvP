@@ -46,7 +46,6 @@ class MatchTask extends ArenaTask {
 	public function __construct(ArenaPvP $plugin, array $players, Kit $kit, Arena $arena, bool $teams = false, bool $ranked = false) {
 		parent::__construct($plugin);
 		$plugin->getServer()->getScheduler()->scheduleDelayedTask($this, 60);
-		$arena->setInUse();
 		$this->players = $players;
 		$this->kit = $kit;
 		$this->teams = $teams;

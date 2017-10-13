@@ -11,7 +11,6 @@ namespace sys\arenapvp\match;
 
 use pocketmine\event\entity\EntityDamageByEntityEvent;
 use pocketmine\event\entity\EntityDamageEvent;
-use pocketmine\level\Position;
 use pocketmine\utils\TextFormat;
 use sys\arenapvp\arena\Arena;
 use sys\arenapvp\ArenaPlayer;
@@ -65,25 +64,13 @@ class TeamMatch extends Match {
 
 	public function setTeam(ArenaPlayer $player, int $index) {
 		$team = $this->teams[$index];
-		if (!$team->hasPlayer($player)) {
+		if ($team instanceof Team and !$team->hasPlayer($player)) {
 			$team->addPlayer($player);
 		}
 	}
 
 	public function addTeam(int $index, Team $team) {
 		$this->teams[$index] = $team;
-	}
-
-	public function setMatchPosition(ArenaPlayer $player, int $index) {
-		$this->positions[$player->getName()] = $this->getArena()->getPosition($index);
-	}
-
-	/**
-	 * @param ArenaPlayer $player
-	 * @return Position|null
-	 */
-	public function getMatchPosition(ArenaPlayer $player) {
-		return $this->positions[$player->getName()] ?? null;
 	}
 
 	/**
@@ -124,7 +111,7 @@ class TeamMatch extends Match {
 	 * @param Team $team
 	 * @return null|Team
 	 */
-	public function getOtherTeam(Team $team) {
+	public function getOtherTeam(Team $team): ?Team {
 		foreach ($this->getTeams() as $matchTeam) {
 			if ($team === $matchTeam) {
 				continue;
@@ -145,7 +132,7 @@ class TeamMatch extends Match {
 	 * @param ArenaPlayer $player
 	 * @return null|Team
 	 */
-	public function getTeam(ArenaPlayer $player) {
+	public function getTeam(ArenaPlayer $player): ?Team {
 		foreach ($this->getTeams() as $team) {
 			if ($team->hasPlayer($player)) {
 				return $team;
@@ -161,14 +148,14 @@ class TeamMatch extends Match {
 	/**
 	 * @return Team|null
 	 */
-	public function getWinningTeam() {
+	public function getWinningTeam(): ?Team {
 		return $this->winningTeam ?? null;
 	}
 
 	/**
 	 * @return Team|null
 	 */
-	public function checkTeams() {
+	public function checkTeams(): ?Team {
 		foreach ($this->getTeams() as $team) {
 			if ($team->isDead()) return $team;
 		}
