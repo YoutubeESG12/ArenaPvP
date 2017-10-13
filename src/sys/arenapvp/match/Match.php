@@ -153,7 +153,7 @@ class Match {
 	}
 
 	protected function init() {
-		if (count($this->players) <= 1) {
+		if (!$this->players or count($this->players) <= 1) {
 			$this->reset();
 			return;
 		}
@@ -299,7 +299,15 @@ class Match {
 	}
 
 	public function tick() {
-		if (!$this->hasStarted()) {
+		if ($this->hasEnded()) {
+			$this->finishTime--;
+			if ($this->finishTime <= 0) {
+				$this->reset();
+			}
+			return;
+		}
+
+		if (!$this->hasStarted() and !$this->hasEnded()) {
 			$this->countdown--;
 			$this->getBossBar()->setBossBarTitle(TextFormat::GRAY . "Starting in " . TextFormat::GOLD . gmdate("i:s", $this->countdown - 1) . TextFormat::GRAY . "...");
 			foreach ($this->getPlayers() as $player) {
@@ -333,15 +341,6 @@ class Match {
 			}
 		} else {
 			$this->time--;
-			if (count($this->getPlayers()) <= 1 and !$this->hasEnded()) {
-				$this->setEnded();
-			}
-			if ($this->hasEnded()) {
-				$this->finishTime--;
-				if ($this->finishTime <= 0) {
-					$this->kill();
-				}
-			}
 			$this->handleMessages();
 			foreach ($this->getAll() as $player) $this->getBossBar()->moveEntity($player);
 			$this->getBossBar()->setBossBarTitle(TextFormat::GRAY . "Match Time: " . TextFormat::GOLD . gmdate("i:s", $this->time));
@@ -349,6 +348,10 @@ class Match {
 				$this->broadcastMessage(TextFormat::RED . "Time ran out, so it's a draw!");
 				$this->kill();
 			}
+		}
+
+		if (count($this->getPlayers()) <= 1 and !$this->hasEnded()) {
+			$this->setEnded();
 		}
 	}
 
@@ -654,8 +657,6 @@ class Match {
 	}
 
 	public function reset() {
-		$this->getPlugin()->getMatchManager()->removeMatch($this);
-
 		foreach ($this->getAll() as $player) {
 			if ($player->isSpectating()) {
 				$player->removeFromSpectating();
@@ -669,7 +670,7 @@ class Match {
 				$player->setAllowFlight(false);
 			}
 			//TODO: Add customization
-			$player->teleport($this->getPlugin()->getServer()->getDefaultLevel()->getSpawnLocation());
+			$player->teleport($this->getPlugin()->getServer()->getDefaultLevel()->getSafeSpawn());
 			$this->getPlugin()->getArenaManager()->addLobbyItems($player);
 		}
 		$this->getArena()->resetArena();
@@ -678,26 +679,30 @@ class Match {
 	}
 
 	public function kill() {
+		$this->getPlugin()->getMatchManager()->removeMatch($this);
+
 		if ($this->isRanked()) {
 			$loser = $this->getOtherPlayer($this->getWinner());
 			$this->getWinner()->getElo($this->getKit())->calculateNewElo($this->getWinner(), $loser);
 			$loser->getElo($this->getKit())->calculateNewElo($this->getWinner(), $loser);
 		}
-
-		$this->nullify();
 	}
 
 	public function nullify() {
 		$this->arena = null;
 		$this->blocksPlaced = null;
+		$this->countdown = null;
 		$this->ended = null;
+		$this->finishTime = null;
 		$this->kit = null;
 		$this->matchPlayers = null;
 		$this->players = null;
 		$this->plugin = null;
 		$this->positions = null;
+		$this->ranked = null;
 		$this->spectators = null;
 		$this->started = null;
+		$this->time = null;
 		$this->winner = null;
 	}
 

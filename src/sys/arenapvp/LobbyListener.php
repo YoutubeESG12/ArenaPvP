@@ -95,7 +95,7 @@ class LobbyListener extends BaseListener {
 		$player = $event->getPlayer();
 		$action = $event->getAction();
 		if ($action !== PlayerInteractEvent::LEFT_CLICK_AIR) {
-			if ($player instanceof ArenaPlayer and !$player->inMenu()) {
+			if ($player instanceof ArenaPlayer and !$player->inMenu() and !$player->fullyInMatch()) {
 				$item = $event->getItem();
 				if ($this->getPlugin()->getInteractionManager()->matchesInteraction($item, $player)) {
 					$event->setCancelled();

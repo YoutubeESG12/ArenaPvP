@@ -70,7 +70,7 @@ class InteractionManager {
 	 * @param ArenaPlayer $player
 	 * @return bool
 	 */
-	public function matchesInteraction(Item $item, ArenaPlayer $player): boolean {
+	public function matchesInteraction(Item $item, ArenaPlayer $player): bool {
 		foreach ($this->getPlugin()->getInteractionManager()->getInteractions() as $interaction) {
 			if ($interaction->exists($item)) {
 				$interaction->onInteract($player, $item);
