@@ -32,7 +32,7 @@ class Arena {
 	/** @var Position[] */
 	private $edges = [];
 
-	/** @var string[] */
+	/** @var ArenaChunk[] */
 	private $chunks = [];
 
 	/** @var Position[] */
@@ -138,6 +138,10 @@ class Arena {
 
 	public function setInUse(bool $value = true) {
 		$this->inUse = $value;
+
+		if ($value) {
+			$this->prepareChunks();
+		}
 	}
 
 	/**
@@ -148,7 +152,7 @@ class Arena {
 	}
 
 	/**
-	 * @return string[]
+	 * @return ArenaChunk[]
 	 */
 	public function getChunks(): array {
 		return $this->chunks;
@@ -170,7 +174,8 @@ class Arena {
 	 * @param Chunk $chunk
 	 */
 	public function addChunk(Chunk $chunk) {
-		$this->chunks[$chunk->getX() . $chunk->getZ()] = $chunk->fastSerialize();
+		$this->chunks[$hash = Level::chunkHash($chunk->getX(),  $chunk->getZ())] = new ArenaChunk($this, $chunk);
+		$this->getLevel()->registerChunkLoader($this->chunks[$hash], $chunk->getX(), $chunk->getZ());
 	}
 
 	public function saveChunks() {
@@ -179,7 +184,7 @@ class Arena {
 		$pos2 = $this->getEdge(1);
 		$posMin = new Vector3(min($pos1->x, $pos2->x), min($pos1->y, $pos2->y), min($pos1->z, $pos2->z));
 		$posMax = new Vector3(max($pos1->x, $pos2->x), max($pos1->y, $pos2->y), max($pos1->z, $pos2->z));
-		for($x = $posMin->getFloorX(); $x <= $posMax->getFloorX(); $x++) {
+		for ($x = $posMin->getFloorX(); $x <= $posMax->getFloorX(); $x++) {
 			for ($z = $posMin->getFloorZ(); $z <= $posMax->getFloorZ(); $z++) {
 				$chunk = $this->getLevel()->getChunk($x >> 4, $z >> 4);
 				if ($chunk !== null and !$this->chunkExists($chunk)) {
@@ -191,28 +196,27 @@ class Arena {
 		MainLogger::getLogger()->debug("Arena #" . ($this->getId() + 1) . " > " . count($this->getChunks()) . " chunks saved!");
 	}
 
-	public function removeItemEntities(Chunk $chunk) {
-		foreach ($chunk->getEntities() as $entity) {
-			if ($entity instanceof Item) {
-				$entity->close();
-			}
+	public function prepareChunks() {
+		$level = $this->getLevel();
+		$chunkCount = 0;
+		foreach ($this->chunks as $chunk) {
+			$level->registerChunkLoader($chunk, $chunk->getChunkX(), $chunk->getChunkZ());
+			$chunkCount++;
 		}
+		MainLogger::getLogger()->debug("Arena #" . ($this->getId() + 1) . " > " . $chunkCount . " chunks prepared!");
 	}
 
 	public function resetArena() {
+		$this->setInUse(false);
+		$level = $this->getLevel();
 		$chunkCount = 0;
-		foreach ($this->getChunks() as $chunkString) {
-			$chunk = Chunk::fastDeserialize($chunkString);
+		foreach ($this->getChunks() as $chunk) {
+			$level->unregisterChunkLoader($chunk, $chunk->getChunkX(), $chunk->getChunkZ());
+			$level->setChunk($chunk->getChunkX(), $chunk->getChunkZ(), $chunk->getChunk(), true);
+			$level->clearChunkCache($chunk->getChunkX(), $chunk->getChunkZ());
 			$chunkCount++;
-			$oldChunk = $this->getLevel()->getChunk($chunk->getX(), $chunk->getZ());
-			$this->removeItemEntities($oldChunk);
-			$this->getLevel()->setChunk($chunk->getX(), $chunk->getZ(), $chunk, true);
-			$newChunk = $this->getLevel()->getChunk($chunk->getX(), $chunk->getZ());
-			$this->removeItemEntities($newChunk);
-
 		}
 		MainLogger::getLogger()->debug("Arena #" . ($this->getId() + 1) . " > " . $chunkCount . " chunks reset!");
-		$this->setInUse(false);
 	}
 
 }
